@@ -4,7 +4,7 @@ import time
 import re
 from bs4 import BeautifulSoup
 
-url = "https://old.reddit.com/r/wallstreetbets/top/?sort=top&t=all"
+url = "https://old.reddit.com/r/wallstreetbets/"
 headers = {'User-Agent': 'Mozilla/5.0'}
 
 page = requests.get(url, headers=headers)
@@ -40,6 +40,8 @@ while (counter <= 100):
     if next_button:
         next_page_link = next_button.find('a').attrs['href']
         print(next_page_link)
+    else:
+        break
     time.sleep(2)
     page = requests.get(next_page_link, headers=headers)
     soup = BeautifulSoup(page.text, 'html.parser')
