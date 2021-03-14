@@ -4,45 +4,52 @@ import time
 import re
 from bs4 import BeautifulSoup
 
-url = "https://old.reddit.com/r/wallstreetbets/search?q=yolo&restrict_sr=on&sort=relevance&t=all"
+num_pages = 500
+
+url = "https://old.reddit.com/r/wallstreetbets/search?q=yolo&restrict_sr=on&sort=new&t=all"
 headers = {'User-Agent': 'Mozilla/5.0'}
 
 page = requests.get(url, headers=headers)
 
 soup = BeautifulSoup(page.text, 'html.parser')
-# posts = soup.find_all('div', class_='thing')
 
 counter = 1
-while (counter <= 500):
+print(f'Scraping {num_pages} pages from: {url}')
+while (counter <= num_pages):
     posts = soup.find_all('div', class_='search-result')
     for post in posts:
         title = post.find('a', class_="search-title").text
         flair = post.find('span', class_='linkflairlabel')
-        # if not (flair and flair.text == 'YOLO'):
-        #     continue
-        likes = post.find('span', class_='search-score').text
-        if likes == "•":
+        if not re.search('yolo', title, re.IGNORECASE) or not (flair and flair.text == 'YOLO'):
+            continue
+
+        likes = post.find('span', class_='search-score')
+        if likes:
+            likes = int(likes.text.split()[0].replace(',', ''))
+        else:
             likes = 0
-        else:
-            likes = int(likes.split()[0].replace(',', ''))
+
         comments = post.find('a', class_="search-comments")
-        if comments == "comment":
-            comments = 0
-        else:
+        if comments:
             comments = int(comments.text.split()[0].replace(',', ''))
-        # likes = post.find('div', attrs={"class": "score likes"})['title']
+        else:
+            comments = 0
+
         date = post.find('time')["datetime"]
         
         post_line = [date, title, likes, comments]
         with open('yolo_search_output.csv', 'a') as f:
             writer = csv.writer(f)
             writer.writerow(post_line)
-    counter += 1
     next_button = soup.find('a', rel="next")
     if next_button:
         next_page_link = next_button.attrs['href']
+        print(next_page_link)
     else:
+        print("ran out of pages")
         break
     time.sleep(2)
     page = requests.get(next_page_link, headers=headers)
     soup = BeautifulSoup(page.text, 'html.parser')
+    counter += 1
+print("All done!")
