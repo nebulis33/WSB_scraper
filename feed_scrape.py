@@ -3,7 +3,7 @@ import csv
 import time
 import re
 from bs4 import BeautifulSoup
-num_pages: 50
+num_pages = 50
 url = "https://old.reddit.com/r/wallstreetbets/"
 headers = {'User-Agent': 'Mozilla/5.0'}
 
