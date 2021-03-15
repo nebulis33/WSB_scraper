@@ -51,7 +51,7 @@ def scrape(url):
             else:
                 comments = 0
 
-            date = post.find('time')["datetime"]
+            date = post.find('time')["datetime"].split('T')[0]
             
             post_line = [date, title, likes, comments]
             with open('yolo_search_output.csv', 'a') as f:
